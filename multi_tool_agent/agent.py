@@ -7,8 +7,8 @@ import html
 import json
 
 # Caminhos dos ficheiros
-FICHEIRO_LISTA = "lista_compras.json"
-FICHEIRO_LOCALIZACOES = "TestDataProductsLocation.json"
+FICHEIRO_LISTA = "itemList.json"
+FICHEIRO_LOCALIZACOES = "productLocation.json"
 
 
 def guardar_lista_compras(itens: str) -> dict:
