@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Mapa da Loja - Rota Otimizada</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #f8f9fa;
+}
+canvas {
+  background: white;
+  border: 1px solid #ccc;
+  margin-top: 20px;
+  border-radius: 8px;
+}
+</style>
+</head>
+<body>
+<h2>🛒 Rota Otimizada na Loja</h2>
+<p>Mostrando o percurso entre 4 produtos da tua lista de compras.</p>
+<canvas id="mapa" width="600" height="600"></canvas>
+
+<script>
+const rota = [{"ean": "7000000000136", "nome_produto": "Morangos Frescos", "corredor": "Frescos", "secção": "Hortícolas", "prateleira": 2, "caixa": "C02", "coordenada_x": 49.4, "coordenada_y": 21.9}, {"ean": "7000000001954", "nome_produto": "Atum em Lata", "corredor": "Frescos", "secção": "Talho", "prateleira": 5, "caixa": "C04", "coordenada_x": 46.3, "coordenada_y": 25.4}, {"ean": "7000000000263", "nome_produto": "Bacalhau Congelado", "corredor": "Frescos", "secção": "Fruta", "prateleira": 3, "caixa": "C03", "coordenada_x": 23.5, "coordenada_y": 20.5}, {"ean": "7000000000598", "nome_produto": "Queijo Fresco", "corredor": "Frescos", "secção": "Fruta", "prateleira": 1, "caixa": "C06", "coordenada_x": 22.8, "coordenada_y": 15.9}];
+const canvas = document.getElementById("mapa");
+const ctx = canvas.getContext("2d");
+const scale = 10;
+
+function desenhar(pos=0, frac=0) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Grelha leve
+  ctx.strokeStyle = "#eee";
+  for (let i = 0; i <= 50; i++) {
+    ctx.beginPath(); ctx.moveTo(i * scale, 0); ctx.lineTo(i * scale, 50 * scale); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, i * scale); ctx.lineTo(50 * scale, i * scale); ctx.stroke();
+  }
+
+  // Linha azul da rota
+  ctx.beginPath();
+  ctx.strokeStyle = "#2563eb";
+  ctx.lineWidth = 3;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+  rota.forEach((p, i) => {
+    const x = p.coordenada_x * scale, y = p.coordenada_y * scale;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Pontos verdes
+  rota.forEach((p) => {
+    const x = p.coordenada_x * scale, y = p.coordenada_y * scale;
+    ctx.beginPath(); ctx.arc(x, y, 6, 0, 2 * Math.PI);
+    ctx.fillStyle = "#22c55e"; ctx.fill();
+    ctx.fillStyle = "#333"; ctx.font = "10px Arial";
+    ctx.fillText(p.nome_produto, x + 8, y - 8);
+  });
+
+  // Ponto vermelho em movimento
+  if (pos < rota.length - 1) {
+    const p1 = rota[pos], p2 = rota[pos + 1];
+    const x1 = p1.coordenada_x * scale, y1 = p1.coordenada_y * scale;
+    const x2 = p2.coordenada_x * scale, y2 = p2.coordenada_y * scale;
+    const x = x1 + (x2 - x1) * frac;
+    const y = y1 + (y2 - y1) * frac;
+    ctx.beginPath(); ctx.arc(x, y, 8, 0, 2 * Math.PI);
+    ctx.fillStyle = "red"; ctx.fill();
+  } else {
+    const last = rota[rota.length - 1];
+    ctx.beginPath(); ctx.arc(last.coordenada_x * scale, last.coordenada_y * scale, 8, 0, 2 * Math.PI);
+    ctx.fillStyle = "red"; ctx.fill();
+  }
+}
+
+let passo = 0;
+let frac = 0;
+function animar() {
+  frac += 0.01;
+  if (frac >= 1) { frac = 0; passo++; }
+  desenhar(passo, frac);
+  if (passo < rota.length - 1) requestAnimationFrame(animar);
+}
+
+desenhar();
+setTimeout(() => animar(), 1000);
+</script>
+</body>
+</html>
